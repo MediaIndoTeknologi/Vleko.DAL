@@ -7,19 +7,19 @@ Penggunaan untuk data access layer agar dinamis
 
 ## Main steps
 
-### 1.Installation package - Vleko.DAL
+### 1.Installation package - Wonderkid.DAL
 
 In this tutorial, we will only demonstrate the use of DAL. We need to install the following packages in the prepared project with the following reference commands：
 
 ```powershell
-Install-Package Vleko.DAL
+Install-Package Wonderkid.DAL
 ```
 
 ### 2.Register Service
 
 ```Startup.cs
-using Vleko.DAL;
-using Vleko.DAL.Interface;
+using WonderKid.DAL;
+using WonderKid.DAL.Interface;
 
 public void ConfigureServices(IServiceCollection services){
   services.AddTransient(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
@@ -32,9 +32,9 @@ public void ConfigureServices(IServiceCollection services){
 implement IEntity on your model database
 
 ```Order.cs
-using Vleko.DAL.Interface;
+using WonderKid.DAL.Interface;
 
-namespace Vleko.Data.Model
+namespace WonderKid.Data.Model
 {
     public partial class Order : IEntity
     {

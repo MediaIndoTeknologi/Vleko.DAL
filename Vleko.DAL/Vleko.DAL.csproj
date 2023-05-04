@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Vleko</Authors>
+		<Company>Media Indo Teknologi</Company>
+		<Description>Data Action Layer for Dynamic Provider</Description>
+		<Copyright>Copyright 2022</Copyright>
+		<PackageProjectUrl>https://github.com/MediaIndoTeknologi/Vleko.DAL</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/MediaIndoTeknologi/Vleko.DAL</RepositoryUrl>
+		<PackageTags>DataAccessLayer DAL</PackageTags>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<RepositoryType>git</RepositoryType>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<AssemblyVersion></AssemblyVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.0.123" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.14" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.14" />
+	</ItemGroup>
+
+</Project>
