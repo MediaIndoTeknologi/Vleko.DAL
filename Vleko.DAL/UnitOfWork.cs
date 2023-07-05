@@ -278,41 +278,45 @@ namespace Vleko.DAL
                 {
                     var entityName = entry.Entity.GetType().Name;
                     var primaryKey = GetPrimaryKeyValue(entry);
-                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    changelog.Add(new ChangeLog()
                     {
                         Entity = entityName,
                         PrimaryKey = primaryKey,
-                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
-                        OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
                         Type = ChangeLogType.EDIT,
-                        Property = d.Name
-                    }).ToList());
+                        Property = entry.OriginalValues.Properties.Select(d => new ChangeLogProperties()
+                        {
+                            NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
+                            OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
+                            Property = d.Name
+                        }).ToList()
+                    });
                 }
                 foreach (var entry in delete)
                 {
                     var entityName = entry.Entity.GetType().Name;
                     var primaryKey = GetPrimaryKeyValue(entry);
-                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    changelog.Add(new ChangeLog()
                     {
                         Entity = entityName,
                         PrimaryKey = primaryKey,
-                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
-                        Type = ChangeLogType.DELETE,
-                        Property = d.Name
-                    }).ToList());
+                        Type = ChangeLogType.DELETE
+                    });
                 }
                 foreach (var entry in add)
                 {
                     var entityName = entry.Entity.GetType().Name;
                     var primaryKey = GetPrimaryKeyValue(entry);
-                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    changelog.Add(new ChangeLog()
                     {
                         Entity = entityName,
                         PrimaryKey = primaryKey,
-                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
                         Type = ChangeLogType.ADD,
-                        Property = d.Name
-                    }).ToList());
+                        Property = entry.OriginalValues.Properties.Select(d => new ChangeLogProperties()
+                        {
+                            NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
+                            Property = d.Name
+                        }).ToList()
+                    });
                 }
                 return (true, "success", null, changelog);
             }
