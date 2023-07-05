@@ -51,31 +51,29 @@ namespace Vleko.DAL
             _context.Set<TEntity>().AddRange(items);
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> AddSave<TEntity>(TEntity entity) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> AddSave<TEntity>(TEntity entity) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().Add(entity);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> AddSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> AddSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().AddRange(items);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
         #endregion
@@ -91,31 +89,30 @@ namespace Vleko.DAL
             _context.Set<TEntity>().UpdateRange(items);
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> UpdateSave<TEntity>(TEntity entity) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> UpdateSave<TEntity>(TEntity entity) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().Update(entity);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> UpdateSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> UpdateSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().UpdateRange(items);
                 await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
         #endregion
@@ -131,31 +128,29 @@ namespace Vleko.DAL
             _context.Set<TEntity>().RemoveRange(items);
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> DeleteSave<TEntity>(TEntity entity) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> DeleteSave<TEntity>(TEntity entity) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().Remove(entity);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> DeleteSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> DeleteSave<TEntity>(IEnumerable<TEntity> items) where TEntity : class, IEntity
         {
             try
             {
                 _context.Set<TEntity>().RemoveRange(items);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
 
@@ -167,17 +162,16 @@ namespace Vleko.DAL
             _context.Database.ExecuteSqlRaw(query);
         }
 
-        public async Task<(bool Success, string Message, Exception? ex)> ExecuteQuerySave(string query)
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> ExecuteQuerySave(string query)
         {
             try
             {
                 _context.Database.ExecuteSqlRaw(query);
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
             }
         }
         #endregion
@@ -315,14 +309,14 @@ namespace Vleko.DAL
                     {
                         Entity = entityName,
                         PrimaryKey = primaryKey,
-                        NewValue = entry.CurrentValues[d]?.ToString()??"-",
+                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
                         Type = ChangeLogType.ADD,
                         Property = d.Name
                     }).ToList());
                 }
-                return (true, "success", null,changelog);
+                return (true, "success", null, changelog);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return (false, ex.Message, ex, null);
             }

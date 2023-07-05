@@ -16,7 +16,7 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<AssemblyVersion>1.0.0.2</AssemblyVersion>
+		<AssemblyVersion></AssemblyVersion>
 		<FileVersion></FileVersion>
 	</PropertyGroup>
 
