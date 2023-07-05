@@ -1,5 +1,5 @@
-﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -207,22 +207,12 @@ namespace Vleko.DAL
         {
             try
             {
-                IDbConnection db = _context.Database.GetDbConnection();
-                if (db == null)
-                {
-                    _context.Database.OpenConnection();
-                    db = _context.Database.GetDbConnection();
-
-                }
-
-                var result = await db.QueryAsync<T>(query, null, commandType: CommandType.Text);
-                return (true, "success", result.ToList(), null);
+                var result = await _context.Database.SqlQueryRaw<T>(query).ToListAsync();
+                return (true, "success", result, null);
             }
             catch (Exception ex)
             {
-#nullable disable
                 return (false, ex.Message, null, ex);
-#nullable enable
             }
         }
 
@@ -230,22 +220,12 @@ namespace Vleko.DAL
         {
             try
             {
-                IDbConnection db = _context.Database.GetDbConnection();
-                if (db == null)
-                {
-                    _context.Database.OpenConnection();
-                    db = _context.Database.GetDbConnection();
-
-                }
-
-                var result = await db.QueryFirstOrDefaultAsync<T>(query, null, commandType: CommandType.Text);
+                var result = await _context.Database.SqlQueryRaw<T>(query).FirstOrDefaultAsync();
                 return (true, "success", result, null);
             }
             catch (Exception ex)
             {
-#nullable disable
                 return (false, ex.Message, null, ex);
-#nullable enable
             }
         }
         public async Task<(bool Success, string Message, List<Dictionary<string, string>> Result, Exception ex)> DynamicQuery(string query)
@@ -288,6 +268,71 @@ namespace Vleko.DAL
         }
         #endregion
 
+
+        #region Save Changes
+        private async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> SaveChanges()
+        {
+            try
+            {
+                var modified = _context.ChangeTracker.Entries().Where(p => p.State == EntityState.Modified).ToList();
+                var add = _context.ChangeTracker.Entries().Where(p => p.State == EntityState.Added).ToList();
+                var delete = _context.ChangeTracker.Entries().Where(p => p.State == EntityState.Deleted).ToList();
+                List<ChangeLog> changelog = new List<ChangeLog>();
+                await _context.SaveChangesAsync();
+
+                foreach (var entry in modified)
+                {
+                    var entityName = entry.Entity.GetType().Name;
+                    var primaryKey = GetPrimaryKeyValue(entry);
+                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    {
+                        Entity = entityName,
+                        PrimaryKey = primaryKey,
+                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
+                        OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
+                        Type = ChangeLogType.EDIT,
+                        Property = d.Name
+                    }).ToList());
+                }
+                foreach (var entry in delete)
+                {
+                    var entityName = entry.Entity.GetType().Name;
+                    var primaryKey = GetPrimaryKeyValue(entry);
+                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    {
+                        Entity = entityName,
+                        PrimaryKey = primaryKey,
+                        NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
+                        Type = ChangeLogType.DELETE,
+                        Property = d.Name
+                    }).ToList());
+                }
+                foreach (var entry in add)
+                {
+                    var entityName = entry.Entity.GetType().Name;
+                    var primaryKey = GetPrimaryKeyValue(entry);
+                    changelog.AddRange(entry.OriginalValues.Properties.Select(d => new ChangeLog()
+                    {
+                        Entity = entityName,
+                        PrimaryKey = primaryKey,
+                        NewValue = entry.CurrentValues[d]?.ToString()??"-",
+                        Type = ChangeLogType.ADD,
+                        Property = d.Name
+                    }).ToList());
+                }
+                return (true, "success", null,changelog);
+            }
+            catch(Exception ex)
+            {
+                return (false, ex.Message, ex, null);
+            }
+        }
+        string GetPrimaryKeyValue(EntityEntry entity)
+        {
+            string? result = entity.Metadata.FindPrimaryKey()?.Properties.Select(p => entity.Property(p.Name).CurrentValue)?.FirstOrDefault()?.ToString();
+            return result ?? "-";
+        }
+        #endregion
 
     }
 }
