@@ -288,7 +288,8 @@ namespace Vleko.DAL
                             NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
                             OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
                             Property = d.Name
-                        }).ToList()
+                        }).ToList(),
+                        DateChanged = DateTime.UtcNow
                     });
                 }
                 foreach (var entry in delete)
@@ -299,7 +300,8 @@ namespace Vleko.DAL
                     {
                         Entity = entityName,
                         PrimaryKey = primaryKey,
-                        Type = ChangeLogType.DELETE
+                        Type = ChangeLogType.DELETE,
+                        DateChanged = DateTime.UtcNow
                     });
                 }
                 foreach (var entry in add)
@@ -315,7 +317,8 @@ namespace Vleko.DAL
                         {
                             NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
                             Property = d.Name
-                        }).ToList()
+                        }).ToList(),
+                        DateChanged = DateTime.UtcNow
                     });
                 }
                 return (true, "success", null, changelog);
