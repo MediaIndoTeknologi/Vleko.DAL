@@ -283,12 +283,13 @@ namespace Vleko.DAL
                         Entity = entityName,
                         PrimaryKey = primaryKey,
                         Type = ChangeLogType.EDIT,
-                        Property = entry.OriginalValues.Properties.Select(d => new ChangeLogProperties()
-                        {
-                            NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
-                            OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
-                            Property = d.Name
-                        }).ToList(),
+                        Property = entry.OriginalValues.Properties.Where(d => (entry.CurrentValues[d]?.ToString() ?? "-") != (entry.OriginalValues[d]?.ToString() ?? "-"))
+                                .Select(d => new ChangeLogProperties()
+                                {
+                                    NewValue = entry.CurrentValues[d]?.ToString() ?? "-",
+                                    OldValue = entry.OriginalValues[d]?.ToString() ?? "-",
+                                    Property = d.Name
+                                }).ToList(),
                         DateChanged = DateTime.UtcNow
                     });
                 }
