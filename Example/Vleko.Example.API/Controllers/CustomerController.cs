@@ -151,6 +151,41 @@ namespace Vleko.Example.API.Controllers
             }
         }
 
+        [Route("custom_commit")]
+        [HttpPost]
+        public async Task<IActionResult> Custom2([FromForm] int update_product_id, [FromForm] string product_name, [FromForm] int remove_order_detail_id)
+        {
+            try
+            {
+                var update_product = await context.Entity<Product>().Where(d => d.ProductId == update_product_id).FirstOrDefaultAsync();
+                var delete_order = await context.Entity<OrderDetail>().Where(d => d.OrderId == remove_order_detail_id).ToListAsync();
+
+                if (update_product == null && delete_order == null)
+                    return StatusCode(404, "update_product_id  or remove_order_detail_id not found!");
+
+                var transaction = await context.Commit(async () =>
+                {
+                    var add_customer = new Customer()
+                    {
+                        CustomerId = "CST01",
+                        CompanyName = "TESTING"
+                    };
+                    //add
+                    await context.AddSave(add_customer);
+                    //update
+                    update_product.ProductName = product_name;
+                    await context.UpdateSave(update_product);
+                    //delete list
+                    await context.DeleteSave(delete_order);
+                });
+                return StatusCode(200, transaction.log);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
 
     }

@@ -20,16 +20,33 @@ namespace Vleko.DAL
         {
             return _context.Set<TEntity>();
         }
-        public async Task<(bool Success, string Message, Exception? ex)> Commit()
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> Commit()
         {
             try
             {
-                await _context.SaveChangesAsync();
-                return (true, "success", null);
+                return await SaveChanges();
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, ex);
+                return (false, ex.Message, ex, null);
+            }
+        }
+        public async Task<(bool Success, string Message, Exception? ex, List<ChangeLog>? log)> Commit<T>(Func<T> f)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    f();
+                    var save = await SaveChanges();
+                    await transaction.CommitAsync();
+                    return (true, "success", null, save.log);
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, ex.Message, ex, null);
+                }
             }
         }
         public void Dispose()
